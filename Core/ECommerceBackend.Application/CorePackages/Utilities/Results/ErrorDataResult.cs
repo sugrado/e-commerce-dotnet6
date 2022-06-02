@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ECommerceBackend.Application.CorePackages.Utilities.Results
+﻿namespace ECommerceBackend.Application.CorePackages.Utilities.Results
 {
     public class ErrorDataResult<T> : DataResult<T>
     {
