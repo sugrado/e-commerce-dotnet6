@@ -40,6 +40,7 @@ namespace ECommerceBackend.Application.CorePackages.Persistence.EntityFramework
             Table.RemoveRange(entities);
             return true;
         }
+
         public async Task<bool> RemoveAsync(string id)
         {
             TEntity model = await Table.Where(p => p.Id == Guid.Parse(id)).FirstOrDefaultAsync();
