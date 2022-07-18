@@ -1,8 +1,12 @@
-﻿using ECommerceBackend.Application.Repositories.Customers;
+﻿using ECommerceBackend.Application.CorePackages.Utilities.Results;
+using ECommerceBackend.Application.Repositories.Customers;
 using ECommerceBackend.Application.Repositories.Orders;
 using ECommerceBackend.Application.Repositories.Products;
+using ECommerceBackend.Application.RequestParameters;
 using ECommerceBackend.Application.ViewModels.Products;
+using ECommerceBackend.Domain.Entities.Concrete;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ECommerceBackend.Api.Controllers
 {
@@ -30,9 +34,26 @@ namespace ECommerceBackend.Api.Controllers
         }
 
         [HttpGet]
-        public IActionResult Get()
+        public async Task<IActionResult> Get([FromQuery] Pagination pagination)
         {
-            return Ok(_productReadRepository.GetAll(false));
+            var totalCount = await _productReadRepository.GetAll(false).CountAsync();
+            var products = _productReadRepository.GetAll(false)
+                .Select(p => new
+                {
+                    p.Id,
+                    p.Name,
+                    p.Stock,
+                    p.Price,
+                    p.CreatedAt,
+                    p.ModifiedAt
+                })
+                .Skip(pagination.Page * pagination.Size)
+                .Take(pagination.Size);
+            return Ok(new
+            {
+                products,
+                totalCount
+            });
         }
 
         [HttpGet("{id}")]
@@ -51,7 +72,7 @@ namespace ECommerceBackend.Api.Controllers
             var x = await _productWriteRepository.AddAsync(new() { Name = model.Name, Price = model.Price, Stock = model.Stock });
             await _productWriteRepository.SaveAsync();
             Thread.Sleep(5000);
-            return Ok(x);
+            return Ok(new SuccessDataResult<Product>(x));
         }
 
         [HttpPut]
